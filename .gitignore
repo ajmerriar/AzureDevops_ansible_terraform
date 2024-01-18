@@ -1,0 +1,7 @@
+ip.txt
+ansible.cfg
+deployInstance.yml
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
