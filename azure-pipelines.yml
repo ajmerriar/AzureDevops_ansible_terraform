@@ -1,0 +1,40 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  terraformVersion: '1.0.0'
+
+jobs:
+- job: terraform
+  displayName: 'Terraform Plan, Validate, and Apply'
+  
+  steps:
+  - checkout: self
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'ansible_terra'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # The AzureCLI task automatically handles authentication using the service connection.
+        # No need for explicit `az login` here.
+
+  - script: |
+      # Download and install Terraform
+      wget https://releases.hashicorp.com/terraform/$(terraformVersion)/terraform_$(terraformVersion)_linux_amd64.zip
+      unzip terraform_$(terraformVersion)_linux_amd64.zip
+      sudo mv terraform /usr/local/bin/
+
+      # Navigate to the Terraform configuration directory
+      cd $(Build.SourcesDirectory)/path/to/terraform/config
+
+      # Initialize and apply Terraform configuration
+      terraform init -input=false
+      terraform plan -input=false
+      terraform validate
+      terraform apply -auto-approve
+    displayName: 'Terraform Plan, Validate, and Apply'
