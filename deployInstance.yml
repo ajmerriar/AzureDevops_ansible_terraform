@@ -1,0 +1,59 @@
+---
+- name: Deploy Application
+  hosts: all
+  become: true
+  gather_facts: no
+
+  vars:
+    ansible_user: azureuser
+    ansible_password: Password123
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install Apache HTTP Server (httpd)
+      apt:
+        name: apache2
+        state: present
+
+    - name: Install Python 3 and pip
+      apt:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install Docker Python library
+      pip:
+        name: docker
+        state: present
+
+    - name: Start Apache HTTP Server (httpd)
+      service:
+        name: apache2
+        state: started
+
+    - name: Ensure Docker service is started
+      service:
+        name: docker
+        state: started
+
+    - name: Pull Docker image from Docker Hub
+      docker_image:
+        name: ajmer1705/weather_app:latest
+        source: pull
+
+    - name: Run Docker container for the app on port 3000
+      docker_container:
+        name: weather-app
+        image: ajmer1705/weather_app:latest
+        ports:
+          - "3000:3000"
+        restart_policy: always
